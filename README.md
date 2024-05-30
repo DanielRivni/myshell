@@ -1,18 +1,13 @@
-# README: Task 1 
+# Task 1:myshell 
 ## Introduction
 This task is about implementation of a shell program named "myshell".
 
-to compile and use the programs you can compile: myshell
+to compile and use the program you can compile: make myshell
 - can also use "make all" ,"make clean".
-- this program was made in unix based(debian)operation system.
+- and to run: ./myshell
 
 ### Basic Shell:
-This part have the implementation of a shell program named "myshell". It has the following features:
-
-Ability to run CMD tools that exist on the system (by fork + exec + wait)
-Ability to stop running tool by pressing Ctrl+c, but not killing the shell itself (by signal handler)
-Ability to redirect output with ">" and ">>" and allow piping with "|", at least for 2 following pipes.
-Ability to stop itself by "exit" command.
+This program is a custom shell implemented in C called "myshell", providing various features such as command execution, piping, redirection, command history, variable management, and flow control.
 
 ### Usage:
 
