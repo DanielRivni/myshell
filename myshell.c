@@ -10,19 +10,15 @@
 #include <termios.h>
 
 #define MAX_CMND_L 1024
-#define CD_CMND "cd"
-#define EXIT_CMND "quit"
-#define REDO_CMND "!!"
-#define PROMPT_CMND "prompt"
-#define INI_PROMPT "hello: "
 #define MAX_HISTORY_SIZE 30
 
 char *history[MAX_HISTORY_SIZE];
 int history_count = 0;
 int history_index = 0;
 
-char *prompt = INI_PROMPT;
+char *prompt = "hello: ";
 int status;
+// for better order, use enum
 enum redirect_symbol
 {
     REDIRECT_NONE = 0,
@@ -61,7 +57,6 @@ void signal_handler(int signal)
 
 int command_parser(char **parsed_cmnd, char *cmnd, const char *delimeter)
 {
-    // defaut delimeter is space,but we want it as argument so we can use it for pipe
     char *token;
     token = strtok(cmnd, delimeter);
     int str_index = -1;
@@ -70,7 +65,7 @@ int command_parser(char **parsed_cmnd, char *cmnd, const char *delimeter)
         parsed_cmnd[++str_index] = malloc(strlen(token) + 1);
         strcpy(parsed_cmnd[str_index], token);
 
-        // if the delimiter is PIPE we need to ensure there is no spaces:
+        // ensure there is no spaces if the delimiter is PIPE :
         if (strcmp(delimeter, "|") == 0)
         {
             if (parsed_cmnd[str_index][0] == ' ')
@@ -102,7 +97,6 @@ void prompt_changer(const char *new_prompt)
     {
         strcat(prompt, " ");
     }
-    // prompt[strlen(new_prompt)] = '\0';
 }
 void set_variable(char *var, char *val)
 {
@@ -126,7 +120,7 @@ void command_with_ampersand(char *cmnd)
 {
     pid_t pid = fork();
     if (pid == 0)
-    { // we are in child process. no need to wait() as we want it to be & behavior
+    { 
         // setting signal handler as default behavior
         signal(SIGINT, SIG_DFL);
         char *commands[MAX_CMND_L];
@@ -153,7 +147,6 @@ void command_with_pipe(char *cmnd)
             pipe(fd[i]);
         }
         pid_t pid = fork();
-        // setting the signal handler as default behavior (because child)
         if (pid == 0)
         {
             signal(SIGINT, SIG_DFL);
@@ -216,7 +209,7 @@ void commands_with_redirection(char *cmnd)
         switch (symbol)
         {
         case REDIRECT_NONE:
-            break; // not suppuse to happen
+            break; 
         case REDIRECT_OUT:
             fd = creat(parsed_cmnd[cmnds - 1], 0660);
             dup2(fd, 1);
@@ -248,15 +241,15 @@ void commands_with_redirection(char *cmnd)
 }
 void commands_miscellaneous(char *cmnd)
 {
-    /*this function will handle any other cmnds that are not pipe or redirect excplict*/
+    
     char *parsed_cmnd[MAX_CMND_L];
     command_parser(parsed_cmnd, cmnd, " ");
     // now check what cmnd is it:
-    if (!strcmp(parsed_cmnd[0], PROMPT_CMND)) // prompt changing
+    if (!strcmp(parsed_cmnd[0], "prompt")) // prompt changing
     {
         prompt_changer(parsed_cmnd[2]);
     }
-    else if (!strcmp(parsed_cmnd[0], CD_CMND)) // for CD
+    else if (!strcmp(parsed_cmnd[0], "cd")) // for CD
     {
         chdir(parsed_cmnd[1]);
     }
@@ -430,7 +423,7 @@ int main()
 
 
         // if exit
-        if (!strcmp(command, EXIT_CMND))
+        if (!strcmp(command, "quit"))
         {
             break;
         }
@@ -451,7 +444,7 @@ int main()
         if (in_if_block)
         {
             // Check for 'fi' keyword
-            if (strstr(command, "fi") != NULL)
+            if (strcmp(command, "fi") == 0)
             {
                 in_if_block = 0; // End of if block
 
